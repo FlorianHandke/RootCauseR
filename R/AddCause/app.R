@@ -28,7 +28,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
     
     causes <- eventReactive(c(input$load, input$save),{
-        read_rds(paste0(here(), "/inst/Rds/root_causes.Rds")) %>% 
+        res <- read_rds(paste0(here(), "/inst/Rds/root_causes.Rds")) %>% 
             as_tibble()
     })
     
@@ -45,6 +45,8 @@ server <- function(input, output, session) {
         group_autocomplete <- causes()$Group
         specific_autocomplete <- causes()$Specific
         factor_autocomplete <- causes()$Factor
+        source_autocomplete <- causes()$Source
+        
         
         if (is.numeric(input$table_rows_selected)) {
             pre <- causes() %>% slice(input$table_rows_selected)
@@ -53,12 +55,16 @@ server <- function(input, output, session) {
             value_group <- pre$Group
             value_specific <- pre$Specific
             value_factor <- pre$Factor
+            source_factor <- pre$Factor
+            
         } else {
             value_topic <- NULL
             value_general <- NULL
             value_group <- NULL
             value_specific <- NULL
             value_factor <- NULL
+            source_factor <- NULL
+            
         }
         
         tagList(selectizeInput(inputId = 'topic',
@@ -89,6 +95,12 @@ server <- function(input, output, session) {
                                selected = value_factor,
                                multiple = TRUE, # allow for multiple inputs
                                options = list(create = TRUE)),
+                selectizeInput(inputId = 'source',
+                               label = 'Source',
+                               choices = source_autocomplete,
+                               selected = source_factor,
+                               multiple = TRUE, # allow for multiple inputs
+                               options = list(create = TRUE)),
                 actionButton("save",
                              "Save Entry")
         )
@@ -111,14 +123,16 @@ server <- function(input, output, session) {
                         "General" = input$general,
                         "Group" = input$group,
                         "Specific" = input$specific,
-                        "Factor" = input$factor)
+                        "Factor" = input$factor,
+                        "Source" = input$source)
         } else {
             df <- causes() %>% 
                 add_row("Topic" = input$topic,
                         "General" = input$general,
                         "Group" = input$group,
                         "Specific" = input$specific,
-                        "Factor" = input$factor)
+                        "Factor" = input$factor,
+                        "Source" = input$source)
         }
         
         saveRDS(df, paste0(here(), "/inst/Rds/root_causes.Rds"))
