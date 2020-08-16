@@ -28,8 +28,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
     
     causes <- eventReactive(c(input$load, input$save),{
-        res <- read_rds(paste0(here(), "/inst/Rds/root_causes.Rds")) %>% 
-            as_tibble()
+        res <-  
     })
     
     output$ui_input <- renderUI({
